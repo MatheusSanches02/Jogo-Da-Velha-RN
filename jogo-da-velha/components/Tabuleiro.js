@@ -9,11 +9,12 @@ import Quadrado from './Quadrado'
 export default class Tabuleiro extends React.Component{
 
   renderQuadrado(i){
-    const { quadrados, desabilitado } = this.props
+    const { quadrados, desabilitado, onClick } = this.props
     return (
       <Quadrado
         value={ quadrados[i] }
         desabilitado = { desabilitado }
+        onClick={() => onClick(i)}
       />
     )
   }

@@ -3,22 +3,60 @@ import{
   StyleSheet,
   View,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
+  SafeAreaView
 } from 'react-native'
 
 import Tabuleiro from './components/Tabuleiro'
+import verificaVencedor from './utils/VerficaVencedor'
 
 export default class App extends React.Component{
 
   state ={
-    quadrados: [1,2,3,4,5,6,7,8,9],
-    tabuleiroDesabilitado: false 
+    quadrados: Array(9).fill(""),
+    tabuleiroDesabilitado: false,
+    xProximo: true, 
+    mensagem: ""
+  }
+
+  handleOnClick = i =>{
+    const { quadrados, xProximo } = this.state
+    if(quadrados[i]) return
+    const jogador = xProximo? "X" : "O"
+    quadrados[i] = jogador
+    let msg = verificaVencedor(quadrados, jogador)
+    switch(msg){
+      case "X":
+        msg = "Vencedor: X"
+        break
+      case "O":
+        msg = "Vencedor: O"
+        break
+      case "E":
+        msg = "Empate"
+    }
+    const desabilitado = !msg? false : true
+    this.setState({
+      quadrados,
+      xProximo: !xProximo,
+      mensagem: msg,
+      tabuleiroDesabilitado: desabilitado
+    })
+  }
+
+  novoJogo = () => {
+    this.setState({
+      quadrados: Array(9).fill(""),
+      xProximo: true,
+      mensagem: "",
+      tabuleiroDesabilitado: false
+    })
   }
 
   render(){
-    const { quadrados, tabuleiroDesabilitado } = this.state
+    const { quadrados, tabuleiroDesabilitado, xProximo, mensagem } = this.state
     return(
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Jogo da Velha</Text>
         </View>
@@ -26,16 +64,23 @@ export default class App extends React.Component{
           <Tabuleiro
             quadrados = { quadrados }
             desabilitado = { tabuleiroDesabilitado }
+            onClick={ this.handleOnClick }
           />
-          <View>
-            <Text style={styles.text}>Próximo => X</Text>
-            <TouchableOpacity style={styles.textNovoJogo}>Novo Jogo?</TouchableOpacity>
-          </View>
-          <View>
-            <Text style={styles.textVencedor}>Vencedor X</Text>
-          </View>
+          {mensagem === "" &&
+            <View>
+              <Text style={styles.text}>{`Próximo => ${xProximo ? 'X' : 'O'}`}</Text>
+            </View>
+          }
+          {mensagem !== "" &&
+            <View>
+              <Text style={styles.textVencedor}>{mensagem}</Text>
+              <TouchableOpacity onPress={this.novoJogo}>
+                <Text style={styles.textNovoJogo}>Novo Jogo?</Text>
+              </TouchableOpacity>
+            </View>
+          }
         </View>
-      </View>
+      </SafeAreaView>
     )
   }
 }
